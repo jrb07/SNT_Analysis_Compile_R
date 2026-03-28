@@ -34,6 +34,7 @@ Sys.setlocale(locale="C")
 ```{r Global variables}
 {
 # Not doing a great job of delineating global and local variables as of now.
+
 }
 ```
 
@@ -95,6 +96,8 @@ iterate_on_files_in_directory <- function(sholl_files_in_dir=NULL,
     return()
   }
   
+  linked_df <- data.frame()
+  
   # Begin iterating on the files in the directory
   for(i in 1:length(sholl_files_in_dir))
   {
@@ -109,6 +112,14 @@ iterate_on_files_in_directory <- function(sholl_files_in_dir=NULL,
     
     compiled_tidy <- compile_tidy_data(raw_sholl_data, raw_SNT_data)
     
+    if(length(linked_df)==0 )# If this is the first iteration then clone compiled_tidy
+    {
+       linked_df <- compiled_labeled_tidy
+    }
+    else
+    {
+      linked_df <- compile_tidy_data(main_linked_df, compiled_tidy)
+    }
     # Parse the identifying variables from the filepath
     identifiers_start = str_locate(dirpath, "/plated")[1]
     identifiers_substring = substring(dirpath, 
@@ -140,7 +151,7 @@ iterate_on_files_in_directory <- function(sholl_files_in_dir=NULL,
     }
 
     # Add the identifying variables to the dataframe and return
-    return(add_labels_to_tidy_data(compiled_tidy,
+    return(add_labels_to_tidy_data(linked_df,
                                    date_=date_substring,
                                    cell_=cell_substring,
                                    condition_=condition_substring,
