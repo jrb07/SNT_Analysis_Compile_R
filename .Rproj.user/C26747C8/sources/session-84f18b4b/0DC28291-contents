@@ -1,0 +1,131 @@
+## This file will prompt users to locate .csv files containing MACF18-GFP comet
+##    line scans that will be normalized to themselves (y=y/max(y))
+##    this normalized data will be shifted so x(0)=x@max(y)
+##    then the normalized and transformed data will be exported.
+
+#Libraries
+
+```{r Libraries}
+library(tidyverse)
+library(ggplot2)
+library(DescTools)
+library(stringr)
+```
+# Variables
+
+```{r Variables}
+{
+  head_start = -1
+  head_end = 0
+  tail_start = 0
+  tail_end = -1
+  lattice_start = -1
+  # lattice_end = -3
+}
+```
+
+
+#Functions
+
+```{r Functions}
+tidy_comet_data <- function(raw_data)
+{
+  return(raw_data |>
+        mutate(x = `Distance_.microns.`) |>
+        mutate(y = Gray_Value) |>
+          # To normalize the x distance to be 0 at the peak and negative
+          #   in front of the peak and positive behind the peak
+          #   we subtract the x value at the peak from all the x values
+        mutate(norm_x = x-x[which.max(y)]) |>
+          # To normalize the y values we subtract the minimum value from
+          #   all y values to set the lowest values to 0
+          #   then we divide all values by the maximum y value
+          #   this scales the values 0-1 then we multiple by 100 to get percent
+        mutate(norm_y = ((y-min(y))/max(y))*100) |>
+          # To get each region of the comet for curve fitting
+          #   take the normalized x values within a range
+          #   set all other values to 'na'
+        mutate(head_x = if_else(norm_x>(head_start) & norm_x<head_end, as.character(norm_x), 'na')) |>
+        mutate(tail_x = if_else(norm_x>tail_start & norm_x<tail_end, as.character(norm_x), 'na')) |>
+        mutate(lattice_x = if_else(norm_x>lattice_start, as.character(norm_x), 'na')))
+  
+}
+
+one_phase_exponential <- y~1/(1+x^c)
+
+extract_comet_head <- function(tidy_data)
+{
+    return(tidy_data |>
+           filter(head_x!='na') |>
+           select(-tail_x,-lattice_x, -head_x))
+  # head_data <- (tidy_data |>
+  #   filter(head_x!='na') |>
+  #   select(-tail_x,-lattice_x, -head_x))
+  # head_fit <- nls(one_phase_exponential, 
+  #                                data=head_data, 
+  #                                start=list(c=-1), 
+  #                                alg="plinear")
+  # head_fit_decay_constant <- head_fit$m$getAllPars()[1]
+  # return(head_data <- head_data |>
+  #   mutate(head_fit_decay = head_fit_decay_constant))
+}
+extract_comet_tail <- function(tidy_data)
+{
+  return(tidy_data |>
+           filter(tail_x!='na') |>
+           select(-tail_x,-lattice_x, -head_x))
+}
+extract_comet_lattice <- function(tidy_data)
+{
+  return(tidy_data |>
+           filter(lattice_x!='na') |>
+           select(-tail_x,-lattice_x, -head_x))
+}
+```
+
+#Data I/O
+
+```{r Data import, tidying, and saving}
+# Import the data by looping through .csv files in a directory
+# prompt the user to choose a .csv file in the desired parent directory
+# we will loop through all.csv files in this directory ( maybe subdirectories)
+filepath = file.choose()
+filepath_split = SplitPath(filepath)
+files_in_dir = list.files(path=filepath_split$dirname,
+           pattern='^\\s*[track]+(?:\\s*[csv]+)',
+           all.files=F,
+           full.names=T,
+           recursive=T
+           )
+
+for(i in 1:length(files_in_dir))
+{
+  filepath_to_csv <- files_in_dir[i]
+  if(str_detect(filepath_to_csv, pattern=".csv"))
+  {
+    comet <- read.csv(filepath_to_csv)
+    comet_tidy <- tidy_comet_data(comet)
+    filepath_to_csv_split = SplitPath(filepath_to_csv)
+    out_filepath_all =  paste(filepath_to_csv_split$fullpath,
+                "all_normalized_",
+                filepath_to_csv_split$fullfilename,
+                sep="")
+    write.csv(comet_tidy, out_filepath_all)
+    out_filepath_head =  paste(filepath_to_csv_split$fullpath,
+                "head_normalized_",
+                filepath_to_csv_split$fullfilename,
+                sep="")
+    write.csv(extract_comet_head(comet_tidy), out_filepath_head)
+    out_filepath_tail =  paste(filepath_to_csv_split$fullpath,
+                "tail_normalized_",
+                filepath_to_csv_split$fullfilename,
+                sep="")
+    write.csv(extract_comet_tail(comet_tidy), out_filepath_tail)
+    out_filepath_lattice =  paste(filepath_to_csv_split$fullpath,
+                "lattice_normalized_",
+                filepath_to_csv_split$fullfilename,
+                sep="")
+    write.csv(extract_comet_lattice(comet_tidy), out_filepath_lattice)
+  }
+}
+```
