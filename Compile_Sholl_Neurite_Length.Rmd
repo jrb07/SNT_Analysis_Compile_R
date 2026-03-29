@@ -26,7 +26,6 @@ library(DescTools)
 library(stringr)
 
 Sys.setlocale(locale="C")
-
 ```
 
 # Global variables
@@ -34,7 +33,6 @@ Sys.setlocale(locale="C")
 ```{r Global variables}
 {
 # Not doing a great job of delineating global and local variables as of now.
-
 }
 ```
 
@@ -42,6 +40,18 @@ Sys.setlocale(locale="C")
 # Functions
 
 ```{r Functions}
+
+match_col_classes <- function(df1, df2) {
+
+  shared_col_names <- names(df1)[names(df1) %in% names(df2)]
+  shared_col_types <- sapply(df1[,shared_col_names], class)
+
+  for (n in shared_col_names) {
+     class(df2[, n]) <- shared_col_types[n]
+  }
+
+  return(df2)
+ }
 
 tidy_sholl_data <- function(raw_data)
 {
@@ -52,7 +62,7 @@ tidy_sholl_data <- function(raw_data)
 tidy_SNT_data <- function(raw_data)
 {
   return(raw_data |> 
-           select(tail(names(cols), 1), "SWC Type(s)", "No. of paths [Single value]"))
+           select(starts_with("Path length"), starts_with("SWC"), starts_with("No.")))
 }
 
 compile_tidy_data <- function(tidy_sholl_data, tidy_SNT_data)
@@ -96,7 +106,7 @@ iterate_on_files_in_directory <- function(sholl_files_in_dir=NULL,
     return()
   }
   
-  linked_df <- data.frame()
+  tidy_dfs <- list()
   
   # Begin iterating on the files in the directory
   for(i in 1:length(sholl_files_in_dir))
@@ -111,20 +121,12 @@ iterate_on_files_in_directory <- function(sholl_files_in_dir=NULL,
     SNT_tidy <- tidy_SNT_data(raw_SNT_data)
     
     compiled_tidy <- compile_tidy_data(raw_sholl_data, raw_SNT_data)
-    
-    if(length(linked_df)==0 )# If this is the first iteration then clone compiled_tidy
-    {
-       linked_df <- compiled_labeled_tidy
-    }
-    else
-    {
-      linked_df <- compile_tidy_data(main_linked_df, compiled_tidy)
-    }
+
     # Parse the identifying variables from the filepath
-    identifiers_start = str_locate(dirpath, "/plated")[1]
-    identifiers_substring = substring(dirpath, 
+    identifiers_start = str_locate(filepath_to_sholl_csv, "/plated")[1]
+    identifiers_substring = substring(filepath_to_sholl_csv, 
                                              identifiers_start, 
-                                             str_length(dirpath))
+                                             str_length(filepath_to_sholl_csv))
     
     date_end = str_locate_all(identifiers_substring, "/")[[1]][2]
     date_substring = substring(identifiers_substring, 
@@ -149,16 +151,18 @@ iterate_on_files_in_directory <- function(sholl_files_in_dir=NULL,
     {
       timepoint="error"
     }
-
-    # Add the identifying variables to the dataframe and return
-    return(add_labels_to_tidy_data(linked_df,
-                                   date_=date_substring,
-                                   cell_=cell_substring,
-                                   condition_=condition_substring,
-                                   timepoint_=timepoint
-                                   )
-           )
+    # Add the identifying variables to the dataframe and append to main list
+    data_to_append <- add_labels_to_tidy_data(compiled_tidy,
+                                date_=date_substring,
+                                cell_=cell_substring,
+                                condition_=condition_substring,
+                                timepoint_=timepoint
+                                )
+    tidy_dfs[[i]] <- data_to_append
+    
   }
+  # Now outside of iteration loop return the main list
+  return(tidy_dfs)
 }
 
 ```
@@ -172,23 +176,42 @@ iterate_on_files_in_directory <- function(sholl_files_in_dir=NULL,
 # then we will iterate through each Sholl_Metrics and SNT_Measurements
 dirpath_raw = file.choose()
 dirpath_intermediate = SplitPath(dirpath_raw)$fullpath
-dirpath_end = str_locate(dirpath_intermediate, "SNT")[1]+12
+dirpath_end = str_locate(dirpath_intermediate, "/SNT_Analysis/")[1]+13
 dirpath = substring(dirpath_intermediate, 0, dirpath_end)
 
 sholl_files_in_dir = list.files(path=dirpath,
-           pattern='^\\s*[Sholl_Metrics]+(?:\\s*[csv]+)',
+           pattern='^\\s*[Sholl_Metrics]+s*[csv]',
            all.files=F,
            full.names=T,
            recursive=T)
 
 SNT_files_in_dir = list.files(path=dirpath,
-           pattern='^\\s*[SNT Measurements]+(?:\\s*[csv]+)',
+           pattern='^\\s*[SNT Measurements]+s*[csv]',
            all.files=F,
            full.names=T,
            recursive=T)
 
 compiled_labeled_tidy <- iterate_on_files_in_directory(sholl_files_in_dir, 
                                                        SNT_files_in_dir)
+
+df_to_export <- compiled_labeled_tidy[[1]]
+
+for(i in 2:length(sholl_files_in_dir))# compile list of dataframes into 1 df
+{
+  df_to_append <- match_col_classes(compiled_labeled_tidy[[1]], 
+                                    compiled_labeled_tidy[[i]])
+  df_to_export <- bind_rows(df_to_export, df_to_append)
+}
+
+#tidy so that all we see is SNT data for now
+df_to_export <- df_to_export |>
+  select(starts_with('Path length'), 
+         ends_with('(5m)'), 
+         date, 
+         cell, 
+         condition, 
+         timepoint)
+
 save_path = paste(dirpath,
             "from_R_.csv",
             sep="")
@@ -197,6 +220,6 @@ save_path = paste(dirpath,
 # Data saving
 ```{r Data saving}
 
-write.csv(compiled_labeled_tidy, save_path)
+write.csv(df_to_export, save_path)
 
 ```
