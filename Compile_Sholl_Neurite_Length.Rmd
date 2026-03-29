@@ -2,7 +2,9 @@
 title: "Compile_Sholl_Neurite_Length"
 author: "Jeremy Ryan Brown"
 date: "`r Sys.Date()`"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ``` 
@@ -15,6 +17,10 @@ This script will prompt users to locate a file in a main directory with
 The length of each neurite, sum neurite length, num neurites >= 60 microns,
     the sum intersections, the sholl decay value, and R^2 will be compiled
     into 1 tidy dataframe that will be exported and used for graphcrafting.
+    
+Directions:
+  1. Select a .csv files in the subdirectory of a single cell
+  2. View the output file in the SNT_Analysis directory
 ```
 
 # Libraries
@@ -27,15 +33,6 @@ library(stringr)
 
 Sys.setlocale(locale="C")
 ```
-
-# Global variables
-
-```{r Global variables}
-{
-# Not doing a great job of delineating global and local variables as of now.
-}
-```
-
 
 # Functions
 
@@ -219,6 +216,8 @@ save_path = paste(dirpath,
 
 # Data saving
 ```{r Data saving}
+
+print(df_to_export)
 
 write.csv(df_to_export, save_path)
 
