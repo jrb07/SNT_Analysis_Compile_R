@@ -1,0 +1,201 @@
+---
+title: "Compile_Sholl_Neurite_Length"
+author: "Jeremy Ryan Brown"
+date: "`r Sys.Date()`"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+``` 
+This script will prompt users to locate a file in a main directory with 
+    subdirectories that represent cell measurements of neurite length and sholl
+    complexity from SNT with at least 2 files in each subdirectory including:
+      _Sholl_Metrics.csv
+      SNT Measurements.csv
+
+The length of each neurite, sum neurite length, num neurites >= 60 microns,
+    the sum intersections, the sholl decay value, and R^2 will be compiled
+    into 1 tidy dataframe that will be exported and used for graphcrafting.
+    
+Directions:
+  1. Select a .csv files in the subdirectory of a single cell
+  2. View the output file in the SNT_Analysis directory
+```
+
+# Libraries
+
+```{r Libraries}
+library(tidyverse)
+library(DescTools)
+library(stringr)
+
+Sys.setlocale(locale="C")
+```
+
+# Functions
+
+```{r Functions}
+
+tidy_SNT_data <- function(raw_data)
+{
+  return(raw_data |> 
+           select(matches("Path length (5m)", ignore.case=TRUE), 
+                  starts_with("SWC"), 
+                  starts_with("No."),
+                  cur_column()) |>
+            mutate(path_length_microns = `Path length (5m)`) |>
+           select(!`Path length (5m)`))
+}
+
+add_labels_to_tidy_data <- function(tidy_data,
+                                    date_=NULL,
+                                    cell_=NULL, 
+                                    condition_=NULL, 
+                                    timepoint_=NULL)
+{
+  labeled_data <- tidy_data |>
+    mutate(date=c(date_)) |>
+    mutate(cell=c(cell_))|>
+    mutate(condition=c(condition_)) |>
+    mutate(timepoint= c(timepoint_))
+  
+  return(labeled_data)
+}
+
+parse_path_to_identifiers <- function(path_to_parse=NULL)
+{
+  if(is.null(path_to_parse)){return(NULL)} # escape if no path was passed 
+  # Parse the identifying variables from the filepath
+    identifiers_start = str_locate(path_to_parse, "/plated")[1]
+    identifiers_substring_ = substring(path_to_parse, 
+                                             identifiers_start, 
+                                             str_length(path_to_parse))
+    
+    date_end = str_locate_all(identifiers_substring_, "/")[[1]][2]
+    date_substring_ = substring(identifiers_substring_, 
+                                2, 
+                                date_end-1)
+    
+    condition_end = str_locate_all(identifiers_substring_, "/")[[1]][3]
+    condition_substring_ = substring(identifiers_substring_,
+                                    date_end+1,
+                                    condition_end-1)
+    
+    cell_start = str_locate_all(identifiers_substring_, "/")[[1]][4]
+    cell_end = str_locate_all(identifiers_substring_, "/")[[1]][5]
+    cell_substring_ = substring(identifiers_substring_,
+                               cell_start+1,
+                               cell_end-1)
+    
+    if(str_detect(path_to_parse,"DIV1"))
+    {
+      timepoint_ = "1"
+    }else
+    {
+      timepoint_="error"
+    }
+    
+    return(c(date_substring_,
+             condition_substring_,
+             cell_substring_,
+             timepoint_))
+}
+
+iterate_on_files_in_directory <- function()
+{
+  
+  # Check for a null value for SNT files meaning no files were passed to us.
+  if(is.null(SNT_files_in_dir))
+  {
+    print("No SNT CSVs passed to the interate_on_files_in_directory function. 
+          Choose a directory with the correct CSV files present. 
+          The script will now exit.")
+    return()
+  }
+  
+  # Create a list of dataframes to store our dataframes in
+  tidy_dfs <- list()
+  
+  # Begin iterating on the files in the directory
+  for(i in 1:length(SNT_files_in_dir))
+  {
+    filepath_to_SNT_csv <- SNT_files_in_dir[i]
+    
+    raw_SNT_data <- read.csv(filepath_to_SNT_csv, check.names=F)
+    
+    SNT_tidy <- tidy_SNT_data(raw_SNT_data)
+    
+    # Add the identifying variables to the dataframe and append to main list
+    labeled_tidy <- add_labels_to_tidy_data(SNT_tidy,
+                                                     date_=identifiers[1],
+                                                     cell_=identifiers[2],
+                                                     condition_=identifiers[3],
+                                                     timepoint_=identifiers[4])
+    
+    tidy_dfs[[i]] <- labeled_tidy
+    
+  }
+  # Now outside of iteration loop return the main list
+  return(tidy_dfs)
+}
+
+```
+
+# Data import and tidying
+
+```{r Data import and tidying}
+
+# Import the data by looping through Sholl_Metrics.csv files in a directory
+# prompt the user to choose a directory with subdirectory containing the csvs
+# then we will iterate through each Sholl_Metrics and SNT_Measurements
+dirpath_raw = file.choose()
+dirpath_intermediate = SplitPath(dirpath_raw)$fullpath
+dirpath_end = str_locate(dirpath_intermediate, 
+                         regex('/SNT_analysis/', 
+                               ignore_case=TRUE))[1]+13
+dirpath = substring(dirpath_intermediate, 0, dirpath_end)
+
+SNT_files_in_dir = list.files(path=dirpath,
+           pattern='^\\s*[SNT Measurements]+s*[csv]',
+           all.files=F,
+           full.names=T,
+           recursive=T)
+
+identifiers <- parse_path_to_identifiers(SNT_files_in_dir[1])
+
+compiled_labeled_tidys <- iterate_on_files_in_directory()
+
+df_to_export <- compiled_labeled_tidys[[1]]
+
+for(i in 2:length(compiled_labeled_tidys))# compile list of dataframes into 1 df
+{
+  df_to_export <- bind_rows(df_to_export, compiled_labeled_tidys[[i]])
+}
+
+#tidy so that all we see is SNT data for now
+df_to_export <- df_to_export |>
+  select(path_length_microns, 
+         date, 
+         cell, 
+         condition, 
+         timepoint)
+
+save_path = str_c(dirpath,
+                  identifiers[1],
+                  "_",
+                  identifiers[2],
+                  "_DIV",
+                  identifiers[4],
+                  "_",
+                  "R_compiled.csv")
+```
+
+# Data saving
+```{r Data saving}
+
+print(df_to_export)
+
+write.csv(df_to_export, save_path)
+
+```
