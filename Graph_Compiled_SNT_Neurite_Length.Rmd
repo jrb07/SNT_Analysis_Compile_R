@@ -1,5 +1,5 @@
 ---
-title: "Graph_Compiled_Sholl_Neurite_Length"
+title: "Graph_Compiled_SNT_Neurite_Length"
 output:
   pdf_document: default
   html_document: default
