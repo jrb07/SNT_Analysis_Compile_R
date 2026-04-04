@@ -8,19 +8,27 @@ output:
 ---
 
 ``` 
-This script will prompt users to locate a file in a main directory with 
-    subdirectories that represent cell measurements of neurite length and sholl
-    complexity from SNT with at least 2 files in each subdirectory including:
-      _Sholl_Metrics.csv
-      SNT Measurements.csv
+This script willconvert a collection of SNT measurements.csv files from SNT into 
+a single .csv file that is easy to use in graphcrafting with tools like ggplot 
+or PRISM.
 
-The length of each neurite, sum neurite length, num neurites >= 60 microns,
-    the sum intersections, the sholl decay value, and R^2 will be compiled
-    into 1 tidy dataframe that will be exported and used for graphcrafting.
-    
+
+The script will prompt users to locate a file in a main directory with 
+subdirectories that represent cell measurements of neurite length from 
+SNT Measurements.csv
+
+
+An example directory path is below where variables are indicated by `var`
+.../`timepoint`/`date`/`condition`/SNT_analysis/`cell`/SNT Measurements.csv
+
+
+The length of each neurite, sum neurite length, and longest neurte/sum length
+are compiled into 1 tidy dataframe then exported and used for graphcrafting.
+
+
 Directions:
   1. Select a .csv files in the subdirectory of a single cell
-  2. View the output file in the SNT_Analysis directory
+  2. View the output files in the SNT_analysis directory
 ```
 
 # Libraries
@@ -37,7 +45,8 @@ Sys.setlocale(locale="C")
 
 ```{r Functions}
 
-
+#This function will take in the messy data from SNT and tidy it as well as 
+# perform calculations using dplyr.
 tidy_SNT_data <- function(raw_data)
 {
   return(raw_data |> 
@@ -47,11 +56,20 @@ tidy_SNT_data <- function(raw_data)
            na.omit() |>
            distinct() |>
            arrange(desc(path_length_microns), .by_group=TRUE) |>
-           mutate(neurite_number = seq(1, n())) |>
-           mutate(path_length_sum = sum(path_length_microns, na.rm=TRUE)))
+           mutate(neurite_number  = seq(1, n())) |>
+           mutate(path_length_sum = sum(path_length_microns, na.rm=TRUE)) |>
+           mutate(neurite_per_sum = path_length_microns/path_length_sum) |>
+           mutate(morphological_long_axon_present = if_any(everything(), 
+                                                      ~ round(
+                                                        path_length_microns) >= 
+                                                        60)) |>
+           mutate(morphological_short_axon_present = if_any(everything(), 
+                                                      ~ round(
+                                                        path_length_microns) >= 
+                                                        40)))
 }
-
-add_labels_to_tidy_data <- function(tidy_data,
+# This function will add a series of predefined but variable labels to tidy dfs
+add_labels_to_dataframe <- function(tidy_data,
                                     date_=NULL,
                                     cell_=NULL, 
                                     condition_=NULL, 
@@ -65,7 +83,7 @@ add_labels_to_tidy_data <- function(tidy_data,
   
   return(labeled_data)
 }
-
+# This function will strip the identifiers from the path to each csv file
 parse_path_to_identifiers <- function(path_to_parse=NULL)
 {
   if(is.null(path_to_parse)){return(NULL)} # escape if no path was passed 
@@ -91,6 +109,8 @@ parse_path_to_identifiers <- function(path_to_parse=NULL)
                                cell_start+1,
                                cell_end-1)
     
+    # Define the timepoint string as error before fixing it if we find the DIV
+    #   this results in the default if no DIV string is found as "ERROR"
     timepoint_="ERROR"
     
     if(str_detect(path_to_parse,"DIV1"))
@@ -113,7 +133,8 @@ parse_path_to_identifiers <- function(path_to_parse=NULL)
              cell_substring_,
              timepoint_))
 }
-
+#This is essentially the main loop of the script that will read, parse, and 
+# compile SNT Measurements.csv files
 iterate_on_files_in_directory <- function()
 {
   
@@ -133,24 +154,22 @@ iterate_on_files_in_directory <- function()
   for(i in 1:length(SNT_files_in_dir))
   {
     filepath_to_SNT_csv <- SNT_files_in_dir[i]
-    
-    identifiers_ <- parse_path_to_identifiers(filepath_to_SNT_csv)
-    
     raw_SNT_data <- read.csv(filepath_to_SNT_csv)
-    
+    # We will make use of the user-defined functions to simplify this area
+    # Strip and store the identifiers locally
+    identifiers_ <- parse_path_to_identifiers(filepath_to_SNT_csv)
+    # Tidy and add calculations to the dataframe
     SNT_tidy <- tidy_SNT_data(raw_SNT_data)
-    
-    # Add the identifying variables to the dataframe and append to main list
-    labeled_tidy <- add_labels_to_tidy_data(SNT_tidy,
+    # Add the identifying variables to the dataframe and 
+    labeled_tidy <- add_labels_to_dataframe(SNT_tidy,
                                                      date_=identifiers_[1],
                                                      cell_=identifiers_[3],
                                                      condition_=identifiers_[2],
                                                      timepoint_=identifiers_[4])
-    
+    # Append new dataframe to main list of dataframes that we will return
     tidy_dfs[[i]] <- labeled_tidy
-    
   }
-  # Now outside of iteration loop return the main list
+  # Now outside of the main iteration loop return the main list of dataframes
   return(tidy_dfs)
 }
 
@@ -160,9 +179,7 @@ iterate_on_files_in_directory <- function()
 
 ```{r Data import and tidying}
 
-# Import the data by looping through Sholl_Metrics.csv files in a directory
-# prompt the user to choose a directory with subdirectory containing the csvs
-# then we will iterate through each Sholl_Metrics and SNT_Measurements
+# Import the data by looping through SNT Measurements.csv files in a directory.
 dirpath_raw = file.choose()
 dirpath_intermediate = SplitPath(dirpath_raw)$fullpath
 dirpath_end = str_locate(dirpath_intermediate, 
@@ -189,19 +206,12 @@ for(i in 2:length(compiled_labeled_tidys))# compile list of dataframes into 1 df
   df_to_export <- bind_rows(df_to_export, compiled_labeled_tidys[[i]])
 }
 
-#tidy so that all we see is SNT data for now
-# df_to_export <- df_to_export |>
-#   select(path_length_microns, 
-#          date, 
-#          cell, 
-#          condition, 
-#          timepoint)
-
+#Arrange the compiled data by path length within groups defined by cell ID
 df_to_export <- df_to_export |>
   group_by(cell) |>
   arrange(desc(path_length_microns), .by_group=TRUE)
-
-save_path = str_c(dirpath,
+#Create a string path to save the compiled csv data
+save_path_compiled_csv = str_c(dirpath,
                   identifiers[1],
                   "_",
                   identifiers[2],
@@ -209,13 +219,31 @@ save_path = str_c(dirpath,
                   identifiers[4],
                   "_",
                   "R_compiled.csv")
+#Store the summaries created from the grouped compiled data
+summary_to_export <- df_to_export |>
+  summary() |>
+  tibble() |>
+  add_labels_to_dataframe(date_=identifiers[1],
+                          cell_="NA",
+                          condition_=identifiers[2],
+                          timepoint_=identifiers[4])
+#Create a string path to save the summaries of the compiled data
+save_path_csv_summary = str_c(dirpath,
+                  identifiers[1],
+                  "_",
+                  identifiers[2],
+                  "_DIV",
+                  identifiers[4],
+                  "_",
+                  "R_summary.csv")
 ```
 
 # Data saving
 ```{r Data saving}
-
-print(df_to_export)
-
-write.csv(df_to_export, save_path)
-
+# Print and save the compiled dataframe
+# print(df_to_export)
+write.csv(df_to_export, save_path_compiled_csv)
+#Print and save the summaries of the data in the compiled dataframe
+print(summary_to_export)
+write.csv(summary_to_export, save_path_csv_summary)
 ```
