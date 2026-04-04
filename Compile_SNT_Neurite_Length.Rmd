@@ -37,15 +37,17 @@ Sys.setlocale(locale="C")
 
 ```{r Functions}
 
+
 tidy_SNT_data <- function(raw_data)
 {
   return(raw_data |> 
-           select(matches("Path length (5m)", ignore.case=TRUE), 
-                  starts_with("SWC"), 
-                  starts_with("No."),
-                  cur_column()) |>
-            mutate(path_length_microns = `Path length (5m)`) |>
-           select(!`Path length (5m)`))
+           mutate(path_length_microns = as.numeric(`Path.length...m.`)) |> 
+           select(path_length_microns) |>
+           filter_out(path_length_microns == 0) |>
+           na.omit() |>
+           distinct() |>
+           arrange(desc(path_length_microns), .by_group=TRUE) |>
+           mutate(neurite_number = seq(1, n())))
 }
 
 add_labels_to_tidy_data <- function(tidy_data,
@@ -88,12 +90,21 @@ parse_path_to_identifiers <- function(path_to_parse=NULL)
                                cell_start+1,
                                cell_end-1)
     
+    timepoint_="ERROR"
+    
     if(str_detect(path_to_parse,"DIV1"))
     {
       timepoint_ = "1"
-    }else
+    }
+    
+    if(str_detect(path_to_parse,"DIV2"))
     {
-      timepoint_="error"
+      timepoint_="2"
+    }
+    
+    if(str_detect(path_to_parse,"DIV3"))
+    {
+      timepoint_="3"
     }
     
     return(c(date_substring_,
@@ -122,16 +133,18 @@ iterate_on_files_in_directory <- function()
   {
     filepath_to_SNT_csv <- SNT_files_in_dir[i]
     
-    raw_SNT_data <- read.csv(filepath_to_SNT_csv, check.names=F)
+    identifiers_ <- parse_path_to_identifiers(filepath_to_SNT_csv)
+    
+    raw_SNT_data <- read.csv(filepath_to_SNT_csv)
     
     SNT_tidy <- tidy_SNT_data(raw_SNT_data)
     
     # Add the identifying variables to the dataframe and append to main list
     labeled_tidy <- add_labels_to_tidy_data(SNT_tidy,
-                                                     date_=identifiers[1],
-                                                     cell_=identifiers[2],
-                                                     condition_=identifiers[3],
-                                                     timepoint_=identifiers[4])
+                                                     date_=identifiers_[1],
+                                                     cell_=identifiers_[3],
+                                                     condition_=identifiers_[2],
+                                                     timepoint_=identifiers_[4])
     
     tidy_dfs[[i]] <- labeled_tidy
     
@@ -162,6 +175,8 @@ SNT_files_in_dir = list.files(path=dirpath,
            full.names=T,
            recursive=T)
 
+test_raw_df <- read.csv(SNT_files_in_dir[2])
+
 identifiers <- parse_path_to_identifiers(SNT_files_in_dir[1])
 
 compiled_labeled_tidys <- iterate_on_files_in_directory()
@@ -174,12 +189,16 @@ for(i in 2:length(compiled_labeled_tidys))# compile list of dataframes into 1 df
 }
 
 #tidy so that all we see is SNT data for now
+# df_to_export <- df_to_export |>
+#   select(path_length_microns, 
+#          date, 
+#          cell, 
+#          condition, 
+#          timepoint)
+
 df_to_export <- df_to_export |>
-  select(path_length_microns, 
-         date, 
-         cell, 
-         condition, 
-         timepoint)
+  group_by(cell) |>
+  arrange(desc(path_length_microns), .by_group=TRUE)
 
 save_path = str_c(dirpath,
                   identifiers[1],

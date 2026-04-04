@@ -1,0 +1,17 @@
+\,SWC Type(s),Path length (µm)
+Root centroid [L:0.000µm],Undefined,0.0
+Path (1) [L:35.294µm],Axon,35.294083664636155
+Path (2) [L:5.072µm],(Basal) Dendrite,5.072217408045684
+Path (3) [L:7.703µm],(Basal) Dendrite,7.70260701622673
+Path (4) [L:11.744µm],(Basal) Dendrite,11.744434816091339
+Path (5) [L:10.443µm],(Basal) Dendrite,10.443453574373926
+Path (6) [L:14.590µm],(Basal) Dendrite,14.590187582825704
+Path (7) [L:12.043µm] {secondary-neurite},Undefined,12.043453574373935
+ ,null,null
+Mean,"",12.111304704571685
+SD,"",10.43466812560806
+N,"",8
+Min,"",0.0
+Max,"",35.294083664636155
+Sum,"",96.89043763657347
+ ,null,null
