@@ -47,7 +47,8 @@ tidy_SNT_data <- function(raw_data)
            na.omit() |>
            distinct() |>
            arrange(desc(path_length_microns), .by_group=TRUE) |>
-           mutate(neurite_number = seq(1, n())))
+           mutate(neurite_number = seq(1, n())) |>
+           mutate(path_length_sum = sum(path_length_microns, na.rm=TRUE)))
 }
 
 add_labels_to_tidy_data <- function(tidy_data,
