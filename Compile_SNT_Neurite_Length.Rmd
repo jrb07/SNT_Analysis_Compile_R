@@ -8,27 +8,7 @@ output:
 ---
 
 ``` 
-This script willconvert a collection of SNT measurements.csv files from SNT into 
-a single .csv file that is easy to use in graphcrafting with tools like ggplot 
-or PRISM.
-
-
-The script will prompt users to locate a file in a main directory with 
-subdirectories that represent cell measurements of neurite length from 
-SNT Measurements.csv
-
-
-An example directory path is below where variables are indicated by `var`
-.../`timepoint`/`date`/`condition`/SNT_analysis/`cell`/SNT Measurements.csv
-
-
-The length of each neurite, sum neurite length, and longest neurte/sum length
-are compiled into 1 tidy dataframe then exported and used for graphcrafting.
-
-
-Directions:
-  1. Select a .csv files in the subdirectory of a single cell
-  2. View the output files in the SNT_analysis directory
+Instructions found in README.md
 ```
 
 # Libraries
