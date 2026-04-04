@@ -1,0 +1,7 @@
+"","summary(df_to_export).path_length_microns","summary(df_to_export).neurite_number","summary(df_to_export).path_length_sum","summary(df_to_export).neurite_per_sum","summary(df_to_export).morphological_long_axon_present","summary(df_to_export).morphological_short_axon_present","summary(df_to_export).    date","summary(df_to_export).    cell","summary(df_to_export). condition","summary(df_to_export). timepoint","date","cell","condition","timepoint"
+"1",Min.   : 0.5886  ,Min.   : 1.00  ,Min.   : 37.36  ,Min.   :0.003432  ,Mode :logical  ,Mode :logical  ,Length:181        ,Length:181        ,Length:181        ,Length:181        ,"plated_03-20-23","NA","WT","1"
+"2",1st Qu.: 2.0876  ,1st Qu.: 4.00  ,1st Qu.:109.30  ,1st Qu.:0.012939  ,FALSE:179      ,FALSE:174      ,Class :character  ,Class :character  ,Class :character  ,Class :character  ,"plated_03-20-23","NA","WT","1"
+"3",Median : 4.5618  ,Median :10.00  ,Median :171.54  ,Median :0.026663  ,TRUE :2        ,TRUE :7        ,Mode  :character  ,Mode  :character  ,Mode  :character  ,Mode  :character  ,"plated_03-20-23","NA","WT","1"
+"4",Mean   :10.8397  ,Mean   :11.41  ,Mean   :187.00  ,Mean   :0.077348  ,NA,NA,NA,NA,NA,NA,"plated_03-20-23","NA","WT","1"
+"5",3rd Qu.:14.6683  ,3rd Qu.:17.00  ,3rd Qu.:226.44  ,3rd Qu.:0.101769  ,NA,NA,NA,NA,NA,NA,"plated_03-20-23","NA","WT","1"
+"6",Max.   :93.3457  ,Max.   :37.00  ,Max.   :388.34  ,Max.   :0.854462  ,NA,NA,NA,NA,NA,NA,"plated_03-20-23","NA","WT","1"

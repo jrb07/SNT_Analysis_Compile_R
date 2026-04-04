@@ -27,36 +27,101 @@ split_file_path <- SplitPath(file.choose())
 formatted_file_path <- str_c(split_file_path$fullpath, 
                              split_file_path$fullfilename)
 
-save_path <- str_c(split_file_path$fullpath, 
-                "path_length_by_cell.svg")
-
 tidy_data <- read.csv(formatted_file_path)
 
 tidy_data_to_graph <- tidy_data |>
-  # mutate(path_length_microns = as.numeric(Path.length...m.)) |>
-  mutate(cell_id = parse_number(cell)) |>
-  select(path_length_microns, date, cell_id, condition, timepoint) |>
+  mutate(cell_id = parse_number(gsub("e254a_", "", cell, ignore.case=TRUE))) |>
+  mutate(condition = factor(condition, 
+                        levels=c("WT", "wt", "E254A", "e254a"), 
+                        labels=c("WT", "WT", "E254A", "E254A"))) |>
+  mutate(date = gsub("plated_", "", date, ignore.case=TRUE)) |>
+  mutate(date = gsub("-", "/", date, ignore.case=TRUE)) |> 
+  mutate(date = gsub("/23", "/2023", date, ignore.case=TRUE)) |> 
+  mutate(date = gsub("/24", "/2024", date, ignore.case=TRUE)) |>
+  mutate(date = gsub("/25", "/2025", date, ignore.case=TRUE)) |> 
+  mutate(date = gsub("/26", "/2026", date, ignore.case=TRUE)) |> 
+  mutate(date = parse_date(date, "%m/%d/%Y")) |> 
+  mutate(biorep = factor(date, labels=c("biorep_1", "biorep_2"))) |> 
+  select(timepoint,
+         date, 
+         biorep, 
+         condition,
+         cell_id,
+         neurite_number,
+         path_length_microns) |>
   group_by(condition, cell_id) |>
   arrange(desc(path_length_microns), .group_by=TRUE)
 
-plot_p <- (ggplot(data=tidy_data_to_graph, aes(x=path_length_microns))
-            + geom_jitter(show.legend=F,
-                            shape=1,
-                            size=6,
-                            aes(colour=cell_id,
-                            y=condition))
-            + labs(x='Cell', 
-                     y='Length (microns)', 
-                     title='Path length per cell')
-            + scale_x_continuous(limits = c(-5, 100)))
-  
-print(plot_p)
+plot_all_paths <- (ggplot(data=tidy_data_to_graph, aes(x=condition, 
+                                                       y=path_length_microns))
+            + geom_jitter(show.legend=T,
+                            shape=21,
+                            size=4,
+                            aes(color=factor(biorep),
+                                fill=condition,
+                                stroke = 1.25,
+                                alpha=0.8))
+            + labs(x='Condition', 
+                   y='Length (microns)', 
+                   title='All Path Lengths of All Cells')
+            + scale_y_continuous(limits = c(-5, 200))
+            # + scale_y_discrete(limits=rev) # flips the Y so WT is on top
+            # + coord_flip() # flip to vertical graph style
+            + scale_color_discrete(name='biorep', 
+                                    palette=c('#ECFF5E','#98F1EF'), 
+                                    labels=factor(tidy_data_to_graph$biorep))
+            + scale_fill_discrete(name='biorep', 
+                                    palette=c('#6E6E6E','#FF8AF3'), 
+                                    labels=factor(tidy_data_to_graph$condition))
+            + geom_signif(comparisons=list(c("WT", "E254A")), test="t.test"))
 
-plot_p +
-  theme_prism(base_size = 16)
+plot_all_paths <- (plot_all_paths
+                       + theme_prism(palette="colorblind_safe", 
+                                     base_size = 16))
+print(plot_all_paths)
+
+
+longest_paths_only_df <- tidy_data_to_graph |>
+  filter(neurite_number==1) |>
+  distinct(date, biorep, condition, cell_id, path_length_microns)
+
+plot_longest_paths <- (ggplot(data=longest_paths_only_df, aes(x=condition, 
+                                                       y=path_length_microns))
+            + geom_jitter(show.legend=T,
+                            shape=21,
+                            size=4,
+                            aes(color=factor(biorep),
+                                fill=condition,
+                                stroke = 1.25,
+                                alpha=0.05))
+            + labs(x='Condition', 
+                   y='Length of N1 (microns)', 
+                   title='Longest Path Lengths of All Cells')
+            + scale_y_continuous(limits = c(-5, 200))
+            # + scale_y_discrete(limits=rev) # flips the Y so WT is on top
+            # + coord_flip() # flip to vertical graph style
+            + scale_color_discrete(name='biorep', 
+                                    palette=c('#ECFF5E','#98F1EF'), 
+                                    labels=factor(tidy_data_to_graph$biorep))
+            + scale_fill_discrete(name='condition', 
+                                    palette=c('#6E6E6E','#FF8AF3'), 
+                                    labels=factor(tidy_data_to_graph$condition))
+            + geom_signif(comparisons=list(c("WT", "E254A")), test="t.test"))
+
+plot_longest_paths <- (plot_longest_paths
+                       + theme_prism(palette="colorblind_safe", 
+                                     base_size = 16))
+print(plot_longest_paths)
+
 ```
 
 # Data saving
 ```{r Data saving}
-ggsave(file=save_path, plot=plot_p)
+save_path_all_neurites <- str_c(split_file_path$fullpath, 
+                "all_neurites_length_by_cell.svg")
+ggsave(file=save_path_all_neurites, plot=plot_all_paths)
+
+save_path_longest_neurites <- str_c(split_file_path$fullpath, 
+                "longest_neurites_length_by_cell.svg")
+ggsave(file=save_path_longest_neurites, plot=plot_longest_paths)
 ```

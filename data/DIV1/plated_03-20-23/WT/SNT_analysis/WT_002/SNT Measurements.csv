@@ -1,0 +1,52 @@
+\,SWC Type(s),Path length (µm),Branch length (µm) [Min],Branch length (µm) [Max],Branch length (µm) [Mean],Branch length (µm) [SD],Branch length (µm) [Sum],Branch length (µm) [N],Length of longest shortest path (µm) [Single value],Length of primary branches (µm) [Min],Length of primary branches (µm) [Max],Length of primary branches (µm) [Mean],Length of primary branches (µm) [SD],Length of primary branches (µm) [Sum],Length of primary branches (µm) [N],No. of paths [Single value],No. of primary branches [Single value],Path channel [Min],Path channel [Max],Path channel [Mean],Path channel [SD],Path channel [Sum],Path channel [N],Path length (µm) [Min],Path length (µm) [Max],Path length (µm) [Mean],Path length (µm) [SD],Path length (µm) [Sum],Path length (µm) [N],Sholl: No. maxima [Single value],No. of compartments
+Path (1),Axon,37.81794129,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+Path (2),(Basal) Dendrite,3.485618083,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+Path (3),(Basal) Dendrite,3.264704183,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+Path (4),(Basal) Dendrite,21.77448772,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+Path (5),(Basal) Dendrite,25.58200094,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+Path (6),(Basal) Dendrite,19.80683981,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+Path (7),(Basal) Dendrite,3.085618083,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+Path (8),(Basal) Dendrite,1.798037517,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+Path (9),(Basal) Dendrite,1.232352092,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+Path (10),(Basal) Dendrite,33.65848002,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+Path (11),Undefined,17.96697449,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+Path (12),Undefined,0.777123617,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+Path (13),Undefined,1.154247233,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+Path (14),Undefined,2.064704183,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+Path (15),Undefined,3.453265992,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+Path (16),Undefined,2.087580567,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+Path (17),Undefined,3.053265992,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+Path (18),Undefined,3.917970175,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+Path (19),Undefined,1.908494467,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+Path (20),Undefined,2.175161133,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+Path (21),Undefined,1.586599325,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+Path (22),Undefined,3.4627417,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+Path (23),Undefined,0.832352092,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+Path (24),Undefined,1.4209139,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+Path (25),Undefined,1.177123617,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+Path (26),Undefined,2.2209139,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+Path (27),Undefined,2.0418278,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+Path (28),Undefined,4.0418278,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+Path (29),Undefined,5.260779216,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+Path (30),Undefined,2.708494467,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+Path (31),Undefined,1.209475708,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+Path (32),Undefined,2.009475708,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+Path (33),Undefined,2.607513225,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+Path (34),Undefined,1.342809042,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+Path (35),Undefined,2.142809042,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+Path (36),Undefined,1.0209139,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+Path (37),Undefined,1.287580567,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+Root centroid,Axon,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+Cell 1 rooted in Root centroid,null,null,0.721895142,15.29475708,4.637911132,3.582331369,282.9125791,61,47.17981195,5.366997045,12.46012743,8.652419056,2.326721302,86.52419056,10,38,10,3,3,3,0,114,38,0,37.81794129,5.958921542,9.372915127,226.4390186,38,1,3
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+neurites,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+37.81794129,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+3.485618083,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+3.264704183,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+21.77448772,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+25.58200094,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+19.80683981,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+3.085618083,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+1.798037517,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+1.232352092,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+33.65848002,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
