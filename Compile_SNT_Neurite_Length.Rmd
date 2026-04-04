@@ -153,6 +153,25 @@ iterate_on_files_in_directory <- function()
   return(tidy_dfs)
 }
 
+find_and_concatenate_compiled_csvs <- function()
+{
+  compiled_files_in_dir = list.files(path=dirpath_to_main_dir,
+           pattern='R_compiled.csv',
+           all.files=F,
+           full.names=T,
+           recursive=T)
+  
+  concatenated_compiled_df <- read.csv(compiled_files_in_dir[1])
+  
+  for(i in 1:length(compiled_files_in_dir))
+  {
+    compiled_file <- read.csv(compiled_files_in_dir[i])
+    concatenated_compiled_df <- bind_rows(concatenated_compiled_df, 
+                                          compiled_file)
+  }
+  return(concatenated_compiled_df)
+}
+
 ```
 
 # Data import and tidying
@@ -226,4 +245,22 @@ write.csv(df_to_export, save_path_compiled_csv)
 #Print and save the summaries of the data in the compiled dataframe
 print(summary_to_export)
 write.csv(summary_to_export, save_path_csv_summary)
+```
+# Compile and save all compiled dataframes for graphing
+```{r Compile all complations formatted to graph and then save}
+
+full_compiled_csv <- find_and_concatenate_compiled_csvs()
+
+dirpath_to_main_dir_end <- str_locate(dirpath, "/data")[1]+5
+dirpath_to_main_dir <- substring(dirpath, 
+                                    0, 
+                                    dirpath_to_main_dir_end)
+
+save_path_full_compiled_csv <- str_c(dirpath_to_main_dir,
+                  "DIV",
+                  identifiers[4],
+                  "_",
+                  "R_compiled_to_graph.csv")
+
+write.csv(full_compiled_csv, save_path_full_compiled_csv)
 ```
