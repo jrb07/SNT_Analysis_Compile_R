@@ -1,6 +1,8 @@
 ---
 title: "Graph_Compiled_Sholl_Neurite_Length"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 # Libraries
@@ -31,12 +33,11 @@ save_path <- str_c(split_file_path$fullpath,
 tidy_data <- read.csv(formatted_file_path)
 
 tidy_data_to_graph <- tidy_data |>
-  mutate(path_length_microns = as.numeric(Path.length...m.)) |>
+  # mutate(path_length_microns = as.numeric(Path.length...m.)) |>
   mutate(cell_id = parse_number(cell)) |>
   select(path_length_microns, date, cell_id, condition, timepoint) |>
-  group_by(cell_id) |>
-  arrange(path_length_microns) |>
-  na.omit()
+  group_by(condition, cell_id) |>
+  arrange(desc(path_length_microns), .group_by=TRUE)
 
 plot_p <- (ggplot(data=tidy_data_to_graph, aes(x=path_length_microns))
             + geom_jitter(show.legend=F,
